@@ -1,0 +1,24 @@
+{
+  "name": "promote-peer-dependencies",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhdeck/promote-peer-dependencies.git"
+  },
+  "author": "Ray Deck",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rhdeck/promote-peer-dependencies/issues"
+  },
+  "homepage": "https://github.com/rhdeck/promote-peer-dependencies#readme",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "child-process-promise": "^2.2.1"
+  },
+  "bin": "./bin/cli.js"
+}
