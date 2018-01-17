@@ -16,9 +16,5 @@
     "url": "https://github.com/rhdeck/promote-peer-dependencies/issues"
   },
   "homepage": "https://github.com/rhdeck/promote-peer-dependencies#readme",
-  "dependencies": {
-    "bluebird": "^3.5.1",
-    "child-process-promise": "^2.2.1"
-  },
   "bin": "./bin/cli.js"
 }

@@ -1,111 +1,61 @@
 const fs = require("fs");
-const cp = require("child_process");
-const cpp = require("child-process-promise");
 const Path = require("path");
-const Promise = require("bluebird");
+const semver = require("semver");
 function readPackageFromPath(path) {
-  return new Promise((success, reject) => {
-    if (!path) path = process.cwd();
-    const packagePath = Path.resolve(path, "package.json");
-    fs.readFile(packagePath, "utf8", (err, str) => {
-      if (err) {
-        success({}, err);
-      }
-      try {
-        const package = JSON.parse(str);
-        success(package);
-      } catch (err) {
-        success({}, err);
-        reject(err);
-      }
-    });
-  });
+  if (!path) path = process.cwd();
+  const packagePath = Path.resolve(path, "package.json");
+  if (!fs.existsSync(packagePath)) return;
+  str = fs.readFileSync(packagePath, "utf8");
+  try {
+    const package = JSON.parse(str);
+    return package;
+  } catch (err) {}
 }
-function getDependencies(path) {
-  return new Promise((success, reject) => {
-    if (!path) path = process.cwd();
-    return readPackageFromPath(path).then(package => {
-      try {
-        const dependencies = package.dependencies;
-        success(dependencies);
-      } catch (err) {
-        reject(err);
-      }
-    });
-  });
+function returnif(obj) {
+  if (obj) return obj;
+  else return {};
 }
-function getPeersFromDependencies(dependenciesObj, referencePath) {
-  if (!referencePath) referencePath = process.cwd();
-  const dependencyKeys = Object.keys(dependenciesObj);
-  return Promise.all(
-    dependencyKeys.map(key => {
-      return new Promise((success, reject) => {
-        const path = Path.resolve(referencePath, "node_modules", key);
-        return readPackageFromPath(path).then(
-          depPackage => {
-            try {
-              var newDependencies = {};
-              if (depPackage.peerDependencies) {
-                Object.keys(depPackage.peerDependencies).forEach(
-                  peerDependency => {
-                    newDependencies[peerDependency] =
-                      depPackage.peerDependencies[peerDependency];
-                  }
-                );
-              }
-              success(newDependencies);
-            } catch (err) {
-              reject(err);
-            }
-          },
-          error => {
-            console.log("Found an error:", error);
-          }
-        );
-      });
-    })
-  ).then(deps => {
-    return new Promise((success, reject) => {
-      var newDependencies = {};
-      deps.forEach(depObj => {
-        Object.keys(depObj).forEach(key => {
-          newDependencies[key] = depObj[key];
-        });
-      });
-      success(newDependencies, referencePath);
-    });
-  });
-}
-function saveDependencies(newDependencies, path) {
-  return new Promise((success, reject) => {
-    if (!newDependencies || !Object.keys(newDependencies).length) {
-      success([]);
+function mergeif(obj1, obj2) {
+  if (!obj1) obj1 = {};
+  if (!obj2) return obj1;
+  Object.keys(obj2).forEach(k => {
+    const v = obj2[k];
+    if (!obj1[k] || !semver.valid(v)) {
+      obj1[k] = v;
       return;
     }
-    if (!path) path = process.cwd();
-    return readPackageFromPath(path).then(package => {
-      var doSave = false;
-      var addedDeps = [];
-      Object.keys(newDependencies).forEach(key => {
-        if (!package.dependencies[key]) {
-          package.dependencies[key] = newDependencies[key];
-          addedDeps.push(key);
-          doSave = true;
-        }
-      });
-      if (doSave) {
-        return savePackage(package, path)
-          .then(() => {
-            return runYarn(addedDeps);
-          })
-          .then(() => {
-            return Promise.resolve(addedDeps);
-          });
-      } else {
-        success(addedDeps);
-      }
-    });
+    if (semver.gt(obj2[k], obj1[k])) {
+      obj1[k] = v;
+    }
+    //Otherwise do nothing
   });
+}
+function getPeerDependencies(path, useDevDependencies) {
+  if (!path) return null;
+  var ps = {};
+  const p = readPackageFromPath(path);
+  if (p) {
+    ps = mergeif(ps, returnif(p.peerDependencies));
+    Object.keys(returnif(p.dependencies)).forEach(key => {
+      mergeif(ps, getPeerDependencies(resolve(key), useDevDependencies));
+    });
+    if (useDevDependencies) {
+      Object.keys(returnif(p.devDependencies)).forEach(key => {
+        mergeif(ps, getPeerDependencies(resolve(key), useDevDependencies));
+      });
+    }
+  }
+  return ps;
+}
+function saveDependencies(newDependencies, path, asDev) {
+  if (!newDependencies || !Object.keys(newDependencies).length) {
+    return;
+  }
+  const devKey = asDev ? "devDependencies" : "dependencies";
+  var package = readPackageFromPath(path);
+  if (!package[devKey]) package[devKey] = {};
+  package[devKey] = mergeif(package[devKey], newDepdendencies);
+  savePackage(package, path);
 }
 function savePackage(package, path) {
   return new Promise((success, reject) => {
@@ -120,22 +70,17 @@ function savePackage(package, path) {
     });
   });
 }
-function runYarn(path) {
-  return new Promise((success, reject) => {
-    return cpp.spawn("yarn", ["install"], {
-      encoding: "utf8",
-      stdio: "inherit"
-    });
-  });
-}
-function promotePeerDependencies(path) {
+function promotePeerDependencies(path, filterFunc) {
   if (!path) path = process.cwd();
-  return getDependencies(path)
-    .then(dependencies => {
-      return getPeersFromDependencies(dependencies);
-    })
-    .then(newDependencies => {
-      return saveDependencies(newDependencies, path);
+  const peers = getPeerDependencies(path);
+  if (typeof filterFunc == "function") {
+    var goodPeers = {};
+    Object.keys(peers).forEach(key => {
+      if (filterFunc(key, peers[key])) goodPeers[key] = peers[key];
     });
+    return saveDependencies(goodPeers, path);
+  } else {
+    return saveDependencies(peers, path);
+  }
 }
 module.exports = promotePeerDependencies;
