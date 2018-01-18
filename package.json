@@ -16,5 +16,8 @@
     "url": "https://github.com/rhdeck/promote-peer-dependencies/issues"
   },
   "homepage": "https://github.com/rhdeck/promote-peer-dependencies#readme",
-  "bin": "./bin/cli.js"
+  "bin": "./bin/cli.js",
+  "dependencies": {
+    "@raydeck/walk-dependencies": "^1.0.0"
+  }
 }

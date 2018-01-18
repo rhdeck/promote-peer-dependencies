@@ -1,6 +1,7 @@
 const fs = require("fs");
 const Path = require("path");
 const semver = require("semver");
+const walkDependencies = require("@raydeck/walk-dependencies");
 function readPackageFromPath(path) {
   if (!path) path = process.cwd();
   const packagePath = Path.resolve(path, "package.json");
@@ -33,18 +34,9 @@ function mergeif(obj1, obj2) {
 function getPeerDependencies(path, useDevDependencies) {
   if (!path) return null;
   var ps = {};
-  const p = readPackageFromPath(path);
-  if (p) {
+  walkDependencies(path, useDevDependencies, function(path, package) {
     ps = mergeif(ps, returnif(p.peerDependencies));
-    Object.keys(returnif(p.dependencies)).forEach(key => {
-      mergeif(ps, getPeerDependencies(resolve(key), useDevDependencies));
-    });
-    if (useDevDependencies) {
-      Object.keys(returnif(p.devDependencies)).forEach(key => {
-        mergeif(ps, getPeerDependencies(resolve(key), useDevDependencies));
-      });
-    }
-  }
+  });
   return ps;
 }
 function saveDependencies(newDependencies, path, asDev) {
