@@ -62,17 +62,17 @@ function savePackage(package, path) {
     });
   });
 }
-function promotePeerDependencies(path, filterFunc) {
+function promotePeerDependencies(path, targetpath, filterFunc) {
   if (!path) path = process.cwd();
+  if (!filterFunc || typeof filterFunc != "function")
+    filterFunc = () => {
+      return true;
+    };
   const peers = getPeerDependencies(path);
-  if (typeof filterFunc == "function") {
-    var goodPeers = {};
-    Object.keys(peers).forEach(key => {
-      if (filterFunc(key, peers[key])) goodPeers[key] = peers[key];
-    });
-    return saveDependencies(goodPeers, path);
-  } else {
-    return saveDependencies(peers, path);
-  }
+  var goodPeers = {};
+  Object.keys(peers).forEach(key => {
+    if (filterFunc(key, peers[key])) goodPeers[key] = peers[key];
+  });
+  return saveDependencies(goodPeers, targetpath);
 }
 module.exports = promotePeerDependencies;
