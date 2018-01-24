@@ -5,3 +5,17 @@
 "@raydeck/walk-dependencies@^1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@raydeck/walk-dependencies/-/walk-dependencies-1.0.0.tgz#8dfee9d4d82a3b2c03f29a369eb3e15109e2dfd4"
+
+commander@^2.13.0:
+  version "2.13.0"
+  resolved "https://registry.npmjs.org/commander/-/commander-2.13.0.tgz#6964bca67685df7c1f1430c584f07d7597885b9c"
+
+semver@^5.4.1:
+  version "5.5.0"
+  resolved "https://registry.npmjs.org/semver/-/semver-5.5.0.tgz#dc4bbc7a6ca9d916dee5d43516f0092b58f7b8ab"
+
+yarnif@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.npmjs.org/yarnif/-/yarnif-1.4.0.tgz#b01332cf93e7065f421e09f9dbb42cbbf2057c57"
+  dependencies:
+    semver "^5.4.1"
