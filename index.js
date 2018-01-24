@@ -30,12 +30,14 @@ function mergeif(obj1, obj2) {
     }
     //Otherwise do nothing
   });
+  return obj1;
 }
 function getPeerDependencies(path, useDevDependencies) {
   if (!path) return null;
   var ps = {};
   walkDependencies(path, useDevDependencies, function(path, package) {
-    ps = mergeif(ps, returnif(p.peerDependencies));
+    let pds = returnif(package.peerDependencies);
+    ps = mergeif(ps, pds);
   });
   return ps;
 }
@@ -46,21 +48,14 @@ function saveDependencies(newDependencies, path, asDev) {
   const devKey = asDev ? "devDependencies" : "dependencies";
   var package = readPackageFromPath(path);
   if (!package[devKey]) package[devKey] = {};
-  package[devKey] = mergeif(package[devKey], newDepdendencies);
-  savePackage(package, path);
+  package[devKey] = mergeif(package[devKey], newDependencies);
+  return savePackage(package, path);
 }
 function savePackage(package, path) {
-  return new Promise((success, reject) => {
-    const str = JSON.stringify(package, null, 2); //Make it human readable
-    const packagePath = Path.resolve(path, "package.json");
-    fs.writeFile(packagePath, str, (err, info) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      success(packagePath);
-    });
-  });
+  const str = JSON.stringify(package, null, 2); //Make it human readable
+  const packagePath = Path.resolve(path, "package.json");
+  fs.writeFileSync(packagePath, str);
+  return true;
 }
 function promotePeerDependencies(path, targetpath, filterFunc) {
   if (!path) path = process.cwd();
@@ -68,8 +63,11 @@ function promotePeerDependencies(path, targetpath, filterFunc) {
     filterFunc = () => {
       return true;
     };
+  console.log("Starting ppd");
   const peers = getPeerDependencies(path);
+  console.log("I found peers", peers);
   var goodPeers = {};
+  if (!peers) return false;
   Object.keys(peers).forEach(key => {
     if (filterFunc(key, peers[key])) goodPeers[key] = peers[key];
   });

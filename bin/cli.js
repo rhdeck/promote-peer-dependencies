@@ -15,18 +15,24 @@ const targetpath = process.cwd();
 var doInstall = false;
 if (commander.args[0]) {
   const package = commander.args[0];
+  console.log("Found a reference package to look for", package);
   //Let's try some techniques for finding this package
+  console.log("Bueller?");
   const packagepath = Path.join(targetpath, "node_modules", package);
+  console.log(packagepath);
   if (fs.existsSync(packagepath)) {
-    ppd(packagepath, targetpath);
-    doInstall = true;
+    console.log("Working with the simple one");
+    if (ppd(packagepath, targetpath)) {
+      doInstall = true;
+    }
   } else {
     try {
       const requirepath = require.resolve(package);
       if (requirepath) {
         if (fs.existsSync(Path.resolve(requirepath, "package.json"))) {
-          ppd(requirepath, targetpath);
-          doInstall = true;
+          if (ppd(requirepath, targetpath)) {
+            doInstall = true;
+          }
         } else {
           var parentpath = requirepath;
           while (!doInstall) {
@@ -36,8 +42,10 @@ if (commander.args[0]) {
             if (fs.existsSync(Path.resolve(parentpath, "package.json"))) {
               const p = require(Path.resolve(parentpath, "package.json"));
               if (p && p.name == package) {
-                ppd(parentpath, targetpath);
-                doInstall = true;
+                if (ppd(parentpath, targetpath)) {
+                  doInstall = true;
+                }
+                break;
               } else {
                 break; // there is something wrong
               }
@@ -48,8 +56,9 @@ if (commander.args[0]) {
     } catch (e) {}
   }
 } else {
-  ppd(path);
-  doInstall = true;
+  if (ppd(path)) {
+    doInstall = true;
+  }
 }
 if (doInstall) {
   yarnif.install();

@@ -3,8 +3,8 @@
 
 
 "@raydeck/walk-dependencies@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/@raydeck/walk-dependencies/-/walk-dependencies-1.0.0.tgz#8dfee9d4d82a3b2c03f29a369eb3e15109e2dfd4"
+  version "1.5.0"
+  resolved "https://registry.npmjs.org/@raydeck/walk-dependencies/-/walk-dependencies-1.5.0.tgz#2741fa41c32ac68bc67b460e7e51b4d0c419fbaa"
 
 commander@^2.13.0:
   version "2.13.0"
