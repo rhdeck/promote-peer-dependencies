@@ -63,9 +63,7 @@ function promotePeerDependencies(path, targetpath, filterFunc) {
     filterFunc = () => {
       return true;
     };
-  console.log("Starting ppd");
   const peers = getPeerDependencies(path);
-  console.log("I found peers", peers);
   var goodPeers = {};
   if (!peers) return false;
   Object.keys(peers).forEach(key => {

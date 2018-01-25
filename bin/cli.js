@@ -15,13 +15,9 @@ const targetpath = process.cwd();
 var doInstall = false;
 if (commander.args[0]) {
   const package = commander.args[0];
-  console.log("Found a reference package to look for", package);
   //Let's try some techniques for finding this package
-  console.log("Bueller?");
   const packagepath = Path.join(targetpath, "node_modules", package);
-  console.log(packagepath);
   if (fs.existsSync(packagepath)) {
-    console.log("Working with the simple one");
     if (ppd(packagepath, targetpath)) {
       doInstall = true;
     }
