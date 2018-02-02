@@ -59,6 +59,7 @@ function savePackage(package, path) {
 }
 function promotePeerDependencies(path, targetpath, filterFunc) {
   if (!path) path = process.cwd();
+  if (!targetpath) targetpath = process.cwd();
   if (!filterFunc || typeof filterFunc != "function")
     filterFunc = () => {
       return true;

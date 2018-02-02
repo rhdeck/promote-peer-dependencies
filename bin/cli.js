@@ -52,7 +52,7 @@ if (commander.args[0]) {
     } catch (e) {}
   }
 } else {
-  if (ppd(path)) {
+  if (ppd(targetpath)) {
     doInstall = true;
   }
 }
