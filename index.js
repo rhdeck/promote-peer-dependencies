@@ -21,13 +21,58 @@ function mergeif(obj1, obj2) {
   if (!obj2) return obj1;
   Object.keys(obj2).forEach(k => {
     const v = obj2[k];
-    if (!obj1[k] || !semver.valid(v)) {
+    const o = obj1[k];
+    console.log(k, o, v);
+    if (!o) {
       obj1[k] = v;
       return;
     }
-    if (semver.gt(obj2[k], obj1[k])) {
-      obj1[k] = v;
+    if (!semver.valid(o) && !semver.validRange(o)) {
+      //do nothing - old guy has a magic ticket
+      return;
     }
+    if (!semver.valid(v) && !semver.validRange(v)) {
+      //just do it - new guy has a magic ticket
+      obj1[k] = v;
+      return;
+    }
+    if (semver.valid(o) && semver.valid(v)) {
+      if (semver.gt(v, o)) {
+        obj1[k] = v;
+      }
+      return;
+    }
+    if (semver.valid(o) && semver.validRange(v)) {
+      if (!semver.gtr(o, v)) {
+        console.log("gt fail", o, v);
+        obj1[k] = v;
+      }
+      return;
+    }
+    if (semver.validRange(o) && semver.valid(v)) {
+      if (semver.gtr(v, o)) {
+        obj1[k] = v;
+      }
+      return;
+    }
+    if (semver.validRange(o) && semver.validRange(v)) {
+      if (!semver.intersects(o, v)) {
+        if (v > o) {
+          obj1[k] = v;
+          return;
+        }
+      }
+    }
+
+    // if (!obj1[k] || (!semver.valid(v) && !semver.validRange(v))) {
+    //   console.log("Override because no good semver", k, v, semver.valid(v));
+    //   obj1[k] = v;
+    //   return;
+    // }
+    // if (semver.gt(v, obj1[k])) {
+    //   console.log("Simply greater", v, obj1[k]);
+    //   obj1[k] = v;
+    // }
     //Otherwise do nothing
   });
   return obj1;
@@ -48,8 +93,11 @@ function saveDependencies(newDependencies, path, asDev) {
   const devKey = asDev ? "devDependencies" : "dependencies";
   var package = readPackageFromPath(path);
   if (!package[devKey]) package[devKey] = {};
+  console.log("source is", JSON.stringify(package[devKey], null, 2));
+  console.log("newstuff is", JSON.stringify(newDependencies, null, 2));
   package[devKey] = mergeif(package[devKey], newDependencies);
-  return savePackage(package, path);
+  console.log("Will not save", JSON.stringify(package[devKey], null, 2));
+  //return savePackage(package, path);
 }
 function savePackage(package, path) {
   const str = JSON.stringify(package, null, 2); //Make it human readable
