@@ -18,7 +18,7 @@
   "homepage": "https://github.com/rhdeck/promote-peer-dependencies#readme",
   "bin": "./bin/cli.js",
   "dependencies": {
-    "@raydeck/walk-dependencies": "^1.0.0",
+    "@raydeck/walk-dependencies": "^1.6.2",
     "commander": "^2.13.0",
     "yarnif": "^1.4.0"
   }

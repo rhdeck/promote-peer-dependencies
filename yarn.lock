@@ -2,9 +2,10 @@
 # yarn lockfile v1
 
 
-"@raydeck/walk-dependencies@^1.0.0":
-  version "1.5.0"
-  resolved "https://registry.npmjs.org/@raydeck/walk-dependencies/-/walk-dependencies-1.5.0.tgz#2741fa41c32ac68bc67b460e7e51b4d0c419fbaa"
+"@raydeck/walk-dependencies@^1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@raydeck/walk-dependencies/-/walk-dependencies-1.6.2.tgz#ed07350c013c3def971271061ba5bd4db1854498"
+  integrity sha512-O0oUTelNGGy/hxK0QGSxoUbLpWwBgPP+MJNiRBrO7AzG2py17GkEQHb7m812kJUTMn7m5lwOtZuS4lXol79n0Q==
 
 commander@^2.13.0:
   version "2.13.0"

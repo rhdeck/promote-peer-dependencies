@@ -19,7 +19,7 @@ function returnif(obj) {
 function mergeif(obj1, obj2) {
   if (!obj1) obj1 = {};
   if (!obj2) return obj1;
-  Object.keys(obj2).forEach(k => {
+  Object.keys(obj2).forEach((k) => {
     const v = obj2[k];
     const o = obj1[k];
     if (!o) {
@@ -64,13 +64,20 @@ function mergeif(obj1, obj2) {
   });
   return obj1;
 }
-function getPeerDependencies(path, useDevDependencies) {
+function getPeerDependencies(path, isRecursive, useDevDependencies) {
   if (!path) return null;
   var ps = {};
-  walkDependencies(path, useDevDependencies, function(path, package) {
-    let pds = returnif(package.peerDependencies);
-    ps = mergeif(ps, pds);
-  });
+  walkDependencies(
+    path,
+    useDevDependencies,
+    function (path, package) {
+      let pds = returnif(package.peerDependencies);
+      ps = mergeif(ps, pds);
+    },
+    null,
+    null,
+    isRecursive
+  );
   return ps;
 }
 function saveDependencies(newDependencies, path, asDev) {
@@ -89,17 +96,17 @@ function savePackage(package, path) {
   fs.writeFileSync(packagePath, str);
   return true;
 }
-function promotePeerDependencies(path, targetpath, filterFunc) {
+function promotePeerDependencies(path, targetpath, isRecursive, filterFunc) {
   if (!path) path = process.cwd();
   if (!targetpath) targetpath = process.cwd();
   if (!filterFunc || typeof filterFunc != "function")
     filterFunc = () => {
       return true;
     };
-  const peers = getPeerDependencies(path);
+  const peers = getPeerDependencies(path, isRecursive);
   var goodPeers = {};
   if (!peers) return false;
-  Object.keys(peers).forEach(key => {
+  Object.keys(peers).forEach((key) => {
     if (filterFunc(key, peers[key])) goodPeers[key] = peers[key];
   });
   return saveDependencies(goodPeers, targetpath);
