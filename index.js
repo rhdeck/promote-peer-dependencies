@@ -19,11 +19,21 @@ function returnif(obj) {
 function mergeif(obj1, obj2) {
   if (!obj1) obj1 = {};
   if (!obj2) return obj1;
+
   Object.keys(obj2).forEach((k) => {
     const v = obj2[k];
     const o = obj1[k];
+    console.log("starting mergeif for", { v, o });
     if (!o) {
       obj1[k] = v;
+      return;
+    }
+    if (v == o) {
+      //do nothing - they are the same, so stop it
+      return;
+    }
+    if (v === "*") {
+      //do nothing - v has no strong opinions
       return;
     }
     if (!semver.valid(o) && !semver.validRange(o)) {
